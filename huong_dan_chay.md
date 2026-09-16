@@ -16,24 +16,33 @@ Nếu màn hình hiện ra phiên bản Java thì bạn đã sẵn sàng sử d�
 
 ## Hướng dẫn khởi chạy
 
-### Dành cho macOS (MacBook, iMac...)
+Để tránh lỗi hiển thị font chữ (đặc biệt là trên Windows), bạn **bắt buộc** phải thêm cờ `-encoding UTF-8` khi biên dịch code. 
+
+### Cách 1: Chạy bằng file tự động (Khuyên dùng)
+- **Trên Windows:** Chỉ cần click đúp vào file `run.bat`. (Hoặc mở CMD và gõ `run.bat`).
+- **Trên macOS/Linux:** Mở Terminal, gõ lệnh `./run.sh` và nhấn Enter.
+*(Các file này sẽ tự động biên dịch với chuẩn UTF-8 và chạy ứng dụng cho bạn).*
+
+### Cách 2: Chạy thủ công bằng lệnh
+
+#### Dành cho macOS (MacBook, iMac...)
 1. Mở ứng dụng **Terminal**.
 2. Dùng lệnh `cd` để trỏ tới thư mục chứa thư mục mã nguồn (ví dụ: `cd /Users/trongtri/Documents/spam`).
-3. Nếu bạn mới tải code về hoặc vừa thay đổi code, hãy biên dịch (compile) bằng lệnh:
+3. Nếu bạn mới tải code về, hãy biên dịch (compile) bằng lệnh:
    ```bash
-   javac AutoTyper.java
+   javac -encoding UTF-8 AutoTyper.java
    ```
 4. Khởi chạy ứng dụng:
    ```bash
    java AutoTyper
    ```
 
-### Dành cho Windows
+#### Dành cho Windows
 1. Mở **Command Prompt (cmd)** hoặc **PowerShell**.
    *(Mẹo nhanh: Bạn hãy mở thư mục chứa mã nguồn trong File Explorer, nhấp vào thanh địa chỉ đường dẫn ở phía trên cùng, gõ `cmd` rồi nhấn Enter).*
 2. Nếu bạn chưa biên dịch code, hãy gõ:
    ```cmd
-   javac AutoTyper.java
+   javac -encoding UTF-8 AutoTyper.java
    ```
 3. Khởi chạy ứng dụng:
    ```cmd
