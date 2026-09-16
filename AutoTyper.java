@@ -11,7 +11,6 @@ public class AutoTyper extends JFrame {
     private volatile boolean isRunning = false;
 
     public AutoTyper() {
-        // Thiết lập giao diện native
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -22,40 +21,112 @@ public class AutoTyper extends JFrame {
         setSize(480, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setAlwaysOnTop(true); // Để cửa sổ luôn hiển thị trên cùng, giúp dễ dàng bấm Dừng lại
+        setAlwaysOnTop(true);
 
+        // Panel nền chính
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
-        mainPanel.setBackground(new Color(240, 248, 255));
+        mainPanel.setBackground(new Color(245, 247, 250)); // Nền xám nhạt hiện đại
 
         JLabel titleLabel = new JLabel("CÔNG CỤ TỰ ĐỘNG", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Helvetica Neue", Font.BOLD, 22));
-        titleLabel.setForeground(new Color(41, 128, 185));
+        titleLabel.setForeground(new Color(44, 62, 80));
         titleLabel.setBorder(new EmptyBorder(0, 0, 10, 0));
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
         
-        // Tab 1: Auto Typer
         tabbedPane.addTab("Tự động gõ (Auto Typer)", createTyperPanel());
-        
-        // Tab 2: Auto Clicker
         tabbedPane.addTab("Tự động Click (Auto Clicker)", createClickerPanel());
 
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
         add(mainPanel);
     }
 
-    private JPanel createTyperPanel() {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setOpaque(false);
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+    // --- CÁC COMPONENT TÙY CHỈNH BO GÓC ---
 
+    // Nút bấm bo góc
+    private JButton createRoundedButton(String text, Color bgColor) {
+        JButton btn = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 25, 25); // Bo tròn 25px
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        btn.setFont(new Font("Helvetica Neue", Font.BOLD, 16));
+        btn.setBackground(bgColor);
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false); 
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setPreferredSize(new Dimension(200, 45));
+        return btn;
+    }
+
+    // Ô nhập text bo góc
+    private JTextField createRoundedTextField(String text) {
+        JTextField textField = new JTextField(text, 20) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+            @Override
+            protected void paintBorder(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(200, 200, 200));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 15, 15);
+                g2.dispose();
+            }
+        };
+        textField.setOpaque(false);
+        textField.setBorder(new EmptyBorder(8, 12, 8, 12));
+        textField.setFont(new Font("Helvetica Neue", Font.PLAIN, 14));
+        return textField;
+    }
+
+    // Panel bo góc bọc các form
+    private JPanel createRoundedPanel() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE); // Màu nền trắng cho form
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20); // Bo góc panel
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        panel.setOpaque(false);
+        panel.setBorder(new EmptyBorder(15, 15, 15, 15));
+        return panel;
+    }
+
+    // ----------------------------------------
+
+    private JPanel createTyperPanel() {
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setOpaque(false);
+        wrapper.setBorder(new EmptyBorder(10, 5, 10, 5));
+
+        JPanel panel = createRoundedPanel();
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(12, 10, 12, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         Font labelFont = new Font("Helvetica Neue", Font.BOLD, 14);
@@ -68,8 +139,7 @@ public class AutoTyper extends JFrame {
         lblContent.setFont(labelFont); lblContent.setForeground(labelColor);
         formPanel.add(lblContent, gbc);
         
-        JTextField textInput = new JTextField("chan bo may de", 20);
-        textInput.setFont(inputFont);
+        JTextField textInput = createRoundedTextField("chan bo may de");
         gbc.gridx = 1; gbc.gridy = 0;
         formPanel.add(textInput, gbc);
 
@@ -109,12 +179,19 @@ public class AutoTyper extends JFrame {
         panel.add(formPanel, BorderLayout.CENTER);
 
         // Nút Start
-        JButton actionButton = createActionButton();
-        panel.add(actionButton, BorderLayout.SOUTH);
+        JButton actionButton = createRoundedButton("BẮT ĐẦU CHẠY", new Color(46, 204, 113));
+        
+        JPanel btnPanel = new JPanel(new BorderLayout());
+        btnPanel.setOpaque(false);
+        btnPanel.setBorder(new EmptyBorder(15, 0, 0, 0));
+        btnPanel.add(actionButton, BorderLayout.CENTER);
+        
+        panel.add(btnPanel, BorderLayout.SOUTH);
+        wrapper.add(panel, BorderLayout.CENTER);
 
         actionButton.addActionListener(e -> {
             if (isRunning) {
-                isRunning = false; // Bấm lần 2 sẽ dừng lại
+                isRunning = false;
                 return;
             }
 
@@ -126,14 +203,15 @@ public class AutoTyper extends JFrame {
             startTyperTask(actionButton, text, count, delay, initialDelay);
         });
 
-        return panel;
+        return wrapper;
     }
 
     private JPanel createClickerPanel() {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setOpaque(false);
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setOpaque(false);
+        wrapper.setBorder(new EmptyBorder(10, 5, 10, 5));
 
+        JPanel panel = createRoundedPanel();
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -191,12 +269,19 @@ public class AutoTyper extends JFrame {
 
         panel.add(formPanel, BorderLayout.CENTER);
 
-        JButton actionButton = createActionButton();
-        panel.add(actionButton, BorderLayout.SOUTH);
+        JButton actionButton = createRoundedButton("BẮT ĐẦU CHẠY", new Color(46, 204, 113));
+        
+        JPanel btnPanel = new JPanel(new BorderLayout());
+        btnPanel.setOpaque(false);
+        btnPanel.setBorder(new EmptyBorder(15, 0, 0, 0));
+        btnPanel.add(actionButton, BorderLayout.CENTER);
+        
+        panel.add(btnPanel, BorderLayout.SOUTH);
+        wrapper.add(panel, BorderLayout.CENTER);
 
         actionButton.addActionListener(e -> {
             if (isRunning) {
-                isRunning = false; // Bấm lần 2 sẽ dừng lại
+                isRunning = false;
                 return;
             }
 
@@ -208,20 +293,7 @@ public class AutoTyper extends JFrame {
             startClickerTask(actionButton, btnIndex, count, delay, initialDelay);
         });
 
-        return panel;
-    }
-
-    private JButton createActionButton() {
-        JButton btn = new JButton("BẮT ĐẦU CHẠY");
-        btn.setFont(new Font("Helvetica Neue", Font.BOLD, 16));
-        btn.setBackground(new Color(46, 204, 113));
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setPreferredSize(new Dimension(200, 45));
-        return btn;
+        return wrapper;
     }
 
     private void startTyperTask(JButton btn, String text, int count, int delay, int initialDelay) {
@@ -238,7 +310,7 @@ public class AutoTyper extends JFrame {
                 
                 for (int i = initialDelay; i > 0 && isRunning; i--) {
                     final int time = i;
-                    SwingUtilities.invokeLater(() -> btn.setText("BẮT ĐẦU SAU " + time + " GIÂY (Bấm vào đây để DỪNG)"));
+                    SwingUtilities.invokeLater(() -> btn.setText("BẮT ĐẦU SAU " + time + "s (Bấm để HỦY)"));
                     Thread.sleep(1000);
                 }
 
@@ -247,7 +319,7 @@ public class AutoTyper extends JFrame {
                     return;
                 }
 
-                SwingUtilities.invokeLater(() -> btn.setText("ĐANG CHẠY... BẤM VÀO ĐÂY ĐỂ DỪNG LẠI"));
+                SwingUtilities.invokeLater(() -> btn.setText("ĐANG CHẠY... BẤM ĐỂ DỪNG"));
 
                 String os = System.getProperty("os.name").toLowerCase();
                 int modifierKey = os.contains("mac") ? KeyEvent.VK_META : KeyEvent.VK_CONTROL;
@@ -281,13 +353,13 @@ public class AutoTyper extends JFrame {
         new Thread(() -> {
             try {
                 Robot robot = new Robot();
-                int mouseMask = InputEvent.BUTTON1_DOWN_MASK; // Chuột trái
-                if (btnIndex == 1) mouseMask = InputEvent.BUTTON3_DOWN_MASK; // Chuột phải
-                else if (btnIndex == 2) mouseMask = InputEvent.BUTTON2_DOWN_MASK; // Chuột giữa
+                int mouseMask = InputEvent.BUTTON1_DOWN_MASK; 
+                if (btnIndex == 1) mouseMask = InputEvent.BUTTON3_DOWN_MASK; 
+                else if (btnIndex == 2) mouseMask = InputEvent.BUTTON2_DOWN_MASK; 
                 
                 for (int i = initialDelay; i > 0 && isRunning; i--) {
                     final int time = i;
-                    SwingUtilities.invokeLater(() -> btn.setText("BẮT ĐẦU SAU " + time + " GIÂY (Bấm vào đây để DỪNG)"));
+                    SwingUtilities.invokeLater(() -> btn.setText("BẮT ĐẦU SAU " + time + "s (Bấm để HỦY)"));
                     Thread.sleep(1000);
                 }
 
@@ -296,7 +368,7 @@ public class AutoTyper extends JFrame {
                     return;
                 }
 
-                SwingUtilities.invokeLater(() -> btn.setText("ĐANG CLICK... BẤM VÀO ĐÂY ĐỂ DỪNG LẠI"));
+                SwingUtilities.invokeLater(() -> btn.setText("ĐANG CLICK... BẤM ĐỂ DỪNG"));
 
                 for (int i = 0; i < count && isRunning; i++) {
                     robot.mousePress(mouseMask);
@@ -314,14 +386,16 @@ public class AutoTyper extends JFrame {
 
     private void setButtonStateRunning(JButton btn) {
         SwingUtilities.invokeLater(() -> {
-            btn.setBackground(new Color(231, 76, 60)); // Màu đỏ (báo hiệu có thể dừng)
+            btn.setBackground(new Color(231, 76, 60)); // Màu đỏ
+            btn.repaint();
         });
     }
 
     private void resetButtonState(JButton btn) {
         SwingUtilities.invokeLater(() -> {
             btn.setText("BẮT ĐẦU CHẠY");
-            btn.setBackground(new Color(46, 204, 113)); // Trở lại xanh lá
+            btn.setBackground(new Color(46, 204, 113)); // Màu xanh
+            btn.repaint();
         });
     }
 
