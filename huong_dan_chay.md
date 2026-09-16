@@ -53,5 +53,6 @@ Nếu màn hình hiện ra phiên bản Java thì bạn đã sẵn sàng sử d�
 
 ## 🛠 Các tính năng chính
 - **Tự động gõ (Auto Typer):** Hỗ trợ tự động dán và gửi văn bản. Hoạt động bằng cách gán chữ vào Clipboard rồi mô phỏng phím `Ctrl + V` (trên Windows) hoặc `Command + V` (trên macOS), sau đó tự động ấn `Enter`. Phương pháp này giúp gõ mượt mà **Tiếng Việt có dấu** mà không bị lỗi font.
+- **Tự động gửi ảnh (Auto Image):** Cho phép bạn chọn một file ảnh (JPG, PNG) trên máy. Tool sẽ copy bức ảnh đó vào Clipboard và thực hiện dán ảnh liên tục vào khung chat để gửi đi hệt như cách gửi tin nhắn chữ.
 - **Tự động Click (Auto Clicker):** Hỗ trợ tự động nhấp liên tục chuột Trái, Phải hoặc Giữa.
 - Cửa sổ ứng dụng được thiết kế để luôn hiển thị **nổi lên trên cùng** (Always On Top). Nhờ vậy, ngay cả khi tool đang chạy spam/click với tốc độ cao, bạn vẫn có thể dễ dàng ấn vào nút **DỪNG LẠI** bất kỳ lúc nào!

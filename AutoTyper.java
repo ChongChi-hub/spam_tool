@@ -3,12 +3,18 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import javax.imageio.ImageIO;
 
 public class AutoTyper extends JFrame {
 
     private volatile boolean isRunning = false;
+    private File selectedImageFile = null;
 
     public AutoTyper() {
         try {
@@ -18,7 +24,7 @@ public class AutoTyper extends JFrame {
         }
 
         setTitle("Auto Tool Pro");
-        setSize(480, 500);
+        setSize(500, 550);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -42,10 +48,11 @@ public class AutoTyper extends JFrame {
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
+        tabbedPane.setFont(new Font("Helvetica Neue", Font.BOLD, 13));
         
-        tabbedPane.addTab("Tự động gõ (Auto Typer)", createTyperPanel());
-        tabbedPane.addTab("Tự động Click (Auto Clicker)", createClickerPanel());
+        tabbedPane.addTab("Tự động gõ", createTyperPanel());
+        tabbedPane.addTab("Tự động gửi ảnh", createImageSpammerPanel());
+        tabbedPane.addTab("Tự động click", createClickerPanel());
 
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
         add(mainPanel);
@@ -53,7 +60,6 @@ public class AutoTyper extends JFrame {
 
     // --- CÁC COMPONENT TÙY CHỈNH BO GÓC ---
 
-    // Nút bấm bo góc
     private JButton createRoundedButton(String text, Color bgColor) {
         JButton btn = new JButton(text) {
             @Override
@@ -61,7 +67,7 @@ public class AutoTyper extends JFrame {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(getBackground());
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 25, 25); // Bo tròn 25px
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 25, 25);
                 super.paintComponent(g);
                 g2.dispose();
             }
@@ -77,7 +83,6 @@ public class AutoTyper extends JFrame {
         return btn;
     }
 
-    // Ô nhập text bo góc
     private JTextField createRoundedTextField(String text) {
         JTextField textField = new JTextField(text, 20) {
             @Override
@@ -104,15 +109,14 @@ public class AutoTyper extends JFrame {
         return textField;
     }
 
-    // Panel bo góc bọc các form
     private JPanel createRoundedPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10)) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE); // Màu nền trắng cho form
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20); // Bo góc panel
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
                 super.paintComponent(g);
                 g2.dispose();
             }
@@ -185,7 +189,6 @@ public class AutoTyper extends JFrame {
 
         panel.add(formPanel, BorderLayout.CENTER);
 
-        // Nút Start
         JButton actionButton = createRoundedButton("BẮT ĐẦU CHẠY", new Color(46, 204, 113));
         
         JPanel btnPanel = new JPanel(new BorderLayout());
@@ -213,6 +216,116 @@ public class AutoTyper extends JFrame {
         return wrapper;
     }
 
+    private JPanel createImageSpammerPanel() {
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setOpaque(false);
+        wrapper.setBorder(new EmptyBorder(10, 5, 10, 5));
+
+        JPanel panel = createRoundedPanel();
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setOpaque(false);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(12, 10, 12, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        Font labelFont = new Font("Helvetica Neue", Font.BOLD, 14);
+        Font inputFont = new Font("Helvetica Neue", Font.PLAIN, 14);
+        Color labelColor = new Color(52, 73, 94);
+
+        // Chọn file ảnh
+        gbc.gridx = 0; gbc.gridy = 0;
+        JLabel lblContent = new JLabel("Chọn ảnh:");
+        lblContent.setFont(labelFont); lblContent.setForeground(labelColor);
+        formPanel.add(lblContent, gbc);
+        
+        JPanel filePanel = new JPanel(new BorderLayout(5, 0));
+        filePanel.setOpaque(false);
+        JLabel pathLabel = new JLabel("Chưa chọn ảnh...");
+        pathLabel.setFont(new Font("Helvetica Neue", Font.ITALIC, 12));
+        
+        JButton chooseBtn = new JButton("Duyệt...");
+        chooseBtn.setFocusPainted(false);
+        chooseBtn.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Hình ảnh (JPG, PNG)", "jpg", "jpeg", "png", "gif"));
+            int result = fileChooser.showOpenDialog(AutoTyper.this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                selectedImageFile = fileChooser.getSelectedFile();
+                pathLabel.setText(selectedImageFile.getName());
+            }
+        });
+        
+        filePanel.add(chooseBtn, BorderLayout.WEST);
+        filePanel.add(pathLabel, BorderLayout.CENTER);
+        
+        gbc.gridx = 1; gbc.gridy = 0;
+        formPanel.add(filePanel, gbc);
+
+        // Số lần lặp
+        gbc.gridx = 0; gbc.gridy = 1;
+        JLabel lblCount = new JLabel("Số lần gửi:");
+        lblCount.setFont(labelFont); lblCount.setForeground(labelColor);
+        formPanel.add(lblCount, gbc);
+        
+        JSpinner countSpinner = new JSpinner(new SpinnerNumberModel(100, 1, 10000, 1));
+        countSpinner.setFont(inputFont);
+        gbc.gridx = 1; gbc.gridy = 1;
+        formPanel.add(countSpinner, gbc);
+
+        // Khoảng nghỉ
+        gbc.gridx = 0; gbc.gridy = 2;
+        JLabel lblDelay = new JLabel("Khoảng nghỉ (ms):");
+        lblDelay.setFont(labelFont); lblDelay.setForeground(labelColor);
+        formPanel.add(lblDelay, gbc);
+        
+        JSpinner delaySpinner = new JSpinner(new SpinnerNumberModel(500, 1, 10000, 10)); // Mặc định chậm hơn text
+        delaySpinner.setFont(inputFont);
+        gbc.gridx = 1; gbc.gridy = 2;
+        formPanel.add(delaySpinner, gbc);
+
+        // Đợi trước khi chạy
+        gbc.gridx = 0; gbc.gridy = 3;
+        JLabel lblInitDelay = new JLabel("Đợi trước khi chạy (s):");
+        lblInitDelay.setFont(labelFont); lblInitDelay.setForeground(labelColor);
+        formPanel.add(lblInitDelay, gbc);
+        
+        JSpinner initialDelaySpinner = new JSpinner(new SpinnerNumberModel(3, 1, 60, 1));
+        initialDelaySpinner.setFont(inputFont);
+        gbc.gridx = 1; gbc.gridy = 3;
+        formPanel.add(initialDelaySpinner, gbc);
+
+        panel.add(formPanel, BorderLayout.CENTER);
+
+        JButton actionButton = createRoundedButton("BẮT ĐẦU CHẠY", new Color(46, 204, 113));
+        
+        JPanel btnPanel = new JPanel(new BorderLayout());
+        btnPanel.setOpaque(false);
+        btnPanel.setBorder(new EmptyBorder(15, 0, 0, 0));
+        btnPanel.add(actionButton, BorderLayout.CENTER);
+        
+        panel.add(btnPanel, BorderLayout.SOUTH);
+        wrapper.add(panel, BorderLayout.CENTER);
+
+        actionButton.addActionListener(e -> {
+            if (isRunning) {
+                isRunning = false;
+                return;
+            }
+            if (selectedImageFile == null || !selectedImageFile.exists()) {
+                JOptionPane.showMessageDialog(AutoTyper.this, "Vui lòng chọn một file ảnh hợp lệ trước khi bắt đầu!", "Chưa chọn ảnh", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int count = (int) countSpinner.getValue();
+            int delay = (int) delaySpinner.getValue();
+            int initialDelay = (int) initialDelaySpinner.getValue();
+
+            startImageSpammerTask(actionButton, selectedImageFile, count, delay, initialDelay);
+        });
+
+        return wrapper;
+    }
+
     private JPanel createClickerPanel() {
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setOpaque(false);
@@ -229,7 +342,7 @@ public class AutoTyper extends JFrame {
         Font inputFont = new Font("Helvetica Neue", Font.PLAIN, 14);
         Color labelColor = new Color(52, 73, 94);
 
-        // Chuột trái/phải/giữa
+        // Chuột
         gbc.gridx = 0; gbc.gridy = 0;
         JLabel lblButton = new JLabel("Chuột:");
         lblButton.setFont(labelFont); lblButton.setForeground(labelColor);
@@ -353,6 +466,65 @@ public class AutoTyper extends JFrame {
         }).start();
     }
 
+    private void startImageSpammerTask(JButton btn, File imageFile, int count, int delay, int initialDelay) {
+        isRunning = true;
+        setButtonStateRunning(btn);
+
+        new Thread(() -> {
+            try {
+                Image image = ImageIO.read(imageFile);
+                if (image == null) {
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(AutoTyper.this, "Không thể đọc file ảnh này!"));
+                    isRunning = false;
+                    resetButtonState(btn);
+                    return;
+                }
+                
+                TransferableImage transferable = new TransferableImage(image);
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(transferable, null);
+
+                Robot robot = new Robot();
+                
+                for (int i = initialDelay; i > 0 && isRunning; i--) {
+                    final int time = i;
+                    SwingUtilities.invokeLater(() -> btn.setText("BẮT ĐẦU SAU " + time + "s (Bấm để HỦY)"));
+                    Thread.sleep(1000);
+                }
+
+                if (!isRunning) {
+                    resetButtonState(btn);
+                    return;
+                }
+
+                SwingUtilities.invokeLater(() -> btn.setText("ĐANG GỬI ẢNH... BẤM ĐỂ DỪNG"));
+
+                String os = System.getProperty("os.name").toLowerCase();
+                int modifierKey = os.contains("mac") ? KeyEvent.VK_META : KeyEvent.VK_CONTROL;
+
+                for (int i = 0; i < count && isRunning; i++) {
+                    robot.keyPress(modifierKey);
+                    robot.keyPress(KeyEvent.VK_V);
+                    robot.keyRelease(KeyEvent.VK_V);
+                    robot.keyRelease(modifierKey);
+
+                    // Ảnh có thể cần nhiều thời gian để dán vào khung chat hơn text
+                    Thread.sleep(50);
+
+                    robot.keyPress(KeyEvent.VK_ENTER);
+                    robot.keyRelease(KeyEvent.VK_ENTER);
+
+                    Thread.sleep(delay);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                isRunning = false;
+                resetButtonState(btn);
+            }
+        }).start();
+    }
+
     private void startClickerTask(JButton btn, int btnIndex, int count, int delay, int initialDelay) {
         isRunning = true;
         setButtonStateRunning(btn);
@@ -404,6 +576,33 @@ public class AutoTyper extends JFrame {
             btn.setBackground(new Color(46, 204, 113)); // Màu xanh
             btn.repaint();
         });
+    }
+
+    // Lớp tùy chỉnh để đưa ảnh vào Clipboard
+    private static class TransferableImage implements Transferable {
+        private Image image;
+
+        public TransferableImage(Image image) {
+            this.image = image;
+        }
+
+        @Override
+        public DataFlavor[] getTransferDataFlavors() {
+            return new DataFlavor[]{DataFlavor.imageFlavor};
+        }
+
+        @Override
+        public boolean isDataFlavorSupported(DataFlavor flavor) {
+            return DataFlavor.imageFlavor.equals(flavor);
+        }
+
+        @Override
+        public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
+            if (DataFlavor.imageFlavor.equals(flavor)) {
+                return image;
+            }
+            throw new UnsupportedFlavorException(flavor);
+        }
     }
 
     public static void main(String[] args) {
