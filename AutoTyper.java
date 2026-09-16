@@ -19,7 +19,14 @@ public class AutoTyper extends JFrame {
 
         setTitle("Auto Tool Pro");
         setSize(480, 500);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                isRunning = false; // Dừng lập tức việc gõ/click
+                System.exit(0); // Tắt hoàn toàn chương trình (tương đương Ctrl+C)
+            }
+        });
         setLocationRelativeTo(null);
         setAlwaysOnTop(true);
 
