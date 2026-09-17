@@ -8,6 +8,8 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.io.File;
 import javax.imageio.ImageIO;
 
@@ -35,6 +37,27 @@ public class AutoTyper extends JFrame {
         });
         setLocationRelativeTo(null);
         setAlwaysOnTop(true);
+
+        // Lắng nghe phím tắt toàn cục trong phạm vi ứng dụng
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+            @Override
+            public boolean dispatchKeyEvent(KeyEvent e) {
+                if (e.getID() == KeyEvent.KEY_PRESSED) {
+                    int keyCode = e.getKeyCode();
+                    int modifiers = e.getModifiersEx();
+                    boolean isMac = System.getProperty("os.name").toLowerCase().contains("mac");
+                    boolean isShortcutPressed = isMac ? (modifiers & InputEvent.META_DOWN_MASK) != 0 : (modifiers & InputEvent.CTRL_DOWN_MASK) != 0;
+                    
+                    if (isShortcutPressed && keyCode == KeyEvent.VK_C) {
+                        if (isRunning) {
+                            isRunning = false;
+                            System.out.println("Đã nhận lệnh dừng từ phím tắt!");
+                        }
+                    }
+                }
+                return false;
+            }
+        });
 
         // Panel nền chính
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
