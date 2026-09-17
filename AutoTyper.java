@@ -48,7 +48,7 @@ public class AutoTyper extends JFrame {
                     boolean isMac = System.getProperty("os.name").toLowerCase().contains("mac");
                     boolean isShortcutPressed = isMac ? (modifiers & InputEvent.META_DOWN_MASK) != 0 : (modifiers & InputEvent.CTRL_DOWN_MASK) != 0;
                     
-                    if (isShortcutPressed && keyCode == KeyEvent.VK_C) {
+                    if (isShortcutPressed && keyCode == KeyEvent.VK_PERIOD) {
                         if (isRunning) {
                             isRunning = false;
                             System.out.println("Đã nhận lệnh dừng từ phím tắt!");
